@@ -153,6 +153,9 @@ server <- function(input, output, session) {
     coords_sf <- entered_coord_leaf()
     pspl <- rv$r
     
+    req(coords_sf)   
+    req(rv$r)      
+    
     coord_pspl <- st_transform(coords_sf, crs = 3005)
     
     entered_coord_pspl <- extract(pspl, coord_pspl, sp = T)
@@ -288,7 +291,7 @@ server <- function(input, output, session) {
   
   
   df_pspl <- reactive({
-    req(input$upload, input$idcol, input$xcol, input$ycol, input$crs_batch)
+    req(input$upload, input$idcol, input$xcol, input$ycol, input$crs_batch, rv$r)
     
     #Store loaded data in reactive
     df <- uploaded_data()
@@ -324,7 +327,7 @@ server <- function(input, output, session) {
   
   
   output$uploaded_preview <- renderTable({
-    df <- df_pspl()
+    df <- df_pspl() %>% select(-x, -y)
     return(head(df))
   })
   
@@ -449,6 +452,11 @@ server <- function(input, output, session) {
       width = 6,
       tableOutput("polygon_preview")
     )
+  })
+  
+  output$about_page <- renderUI({
+    
+    includeHTML("about.html")
   })
   
 }

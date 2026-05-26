@@ -10,6 +10,7 @@ ui <- dashboardPage(
     width = 320, 
     
     sidebarMenu(
+      id = "tabs",
       
       HTML(paste0(
         "<a href='https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/forests' target='_blank'>
@@ -28,7 +29,8 @@ ui <- dashboardPage(
   "))
       ),
       
-      #menuItem(text = "PSPL v9", icon = icon("file-import")),
+      menuItem(text = "Application", icon = icon("map"), tabName = "app",
+               selected = TRUE),
       
       tags$div(
           style = "
@@ -226,12 +228,22 @@ ui <- dashboardPage(
         )
       ),
       
-      checkboxInput(
-        "show_coords",
-        label = "Display on map",
-        value = FALSE
+      #checkboxInput(
+      #  "show_coords",
+      #  label = "Display on map",
+      #  value = FALSE
+      #),
+      
+      tags$div(
+        style = "margin-top: -30px; margin-bottom: 0px;",
+        checkboxInput(
+          "show_coords",
+          label = "Display on map",
+          value = FALSE
+        )
       ),
       
+      br(),
       
       tags$div(
         id = "polygon",
@@ -280,9 +292,9 @@ ui <- dashboardPage(
       br(),
       br(),
       
-      menuItem(text = "About", icon = icon("circle-info")),
-      menuItem(text = "Example", icon = icon("glasses")),
-      menuItem(text = "Read Me", icon = icon("book"))
+      menuItem(text = "About", icon = icon("circle-info"), tabName = "about"),
+      menuItem(text = "Example", icon = icon("glasses"), tabName = "example")#,
+      #menuItem(text = "Read Me", icon = icon("book"))
     )
   ),
   
@@ -291,47 +303,11 @@ ui <- dashboardPage(
     
     includeCSS("bcgov_01.css"),
     #use_waiter(),
-    
-    tags$head(
-      tags$style(HTML("
-      /* Sidebar menu font size */
-    .sidebar-menu > li > a {
-      font-size: 16px !important;
-    }
-    
-    /* Optional: make icons align better with larger text */
-    .sidebar-menu > li > a > i {
-      font-size: 16px !important;
-    }
-        /* Header */
-        .main-header .logo {
-          font-size: 22px;
-          font-weight: bold;
-        }
-        /* Footer */
-        .main-footer {
-          position: fixed;
-          bottom: 0;
-      left: 0;
-      right: 0;
-          width: 100%;
-          z-index: 1000;
-          background: white;
-          border-top: 1px solid #d2d6de;
-          padding: 10px;
-      box-sizing: border-box;
-      overflow-x: auto;
-      white-space: nowrap;
-        }
-
-        /* Prevent footer overlap */
-        .content-wrapper,
-        .right-side {
-          padding-bottom: 50px;
-        }
-      "))
-    ),
-    
+    tabItems(
+      
+      tabItem(
+        tabName = "app",
+        
     fluidRow(
       box(
         id = "mapbox",
@@ -344,27 +320,31 @@ ui <- dashboardPage(
       
       uiOutput("preview_ui"),
       uiOutput("uploaded_preview_ui"),
-      uiOutput("polygon_preview_ui")
+      uiOutput("polygon_preview_ui"),
+      br()
+    )
       
-      #box(
-      #  title = "PSPL from entered coordinate",
-      #  width = 12,
-      #  tableOutput("preview")
-      #),
-      #box(
-      #  title = "PSPL from uploaded file",
-      #  width = 12,
-      #  tableOutput("uploaded_preview"),
-      #  downloadButton("download", "Download output",
-      #                 style = "color: #fff; background-color: #27ae60; 
-      #                 border-color: #fff;padding: 5px 14px 5px 14px;margin: 5px 5px 5px 5px; ")
-      #),
-      #box(
-      #  title = "Mean PSPL Uploaded polygon",
-      #  width = 12,
-      #  tableOutput("polygon_preview")
-      #)
-      
+    ),
+    
+    
+    tabItem(
+      tabName = "about",
+      #htmlOutput("about_page")
+      tags$iframe(
+        src = "about.html",
+        style = "
+    width: 100%;
+    height: 900px;
+    border: none;
+    background-color: white;
+  "
+      )
+    ),
+    
+    tabItem(
+      tabName = "example",
+      h3("Example page goes here")
+    )
     ),
     
     tags$footer(
@@ -395,5 +375,5 @@ ui <- dashboardPage(
         )
       )
     )
-  )
+)
 )
