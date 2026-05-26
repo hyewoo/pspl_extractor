@@ -29,6 +29,8 @@ For more info, visit [Provincial Site Productivity Layer webpage](https://www2.g
 This web-based application was developed to facilitate custom queries and downloads of PSPL v.9.0 estimates for user-defined locations or areas of interest.  
 
 
-### Example 
+### How to Use
+
+
 
 

@@ -29,6 +29,7 @@ ui <- dashboardPage(
   "))
       ),
       
+      menuItem(text = "About", icon = icon("circle-info"), tabName = "about"),
       menuItem(text = "Application", icon = icon("map"), tabName = "app",
                selected = TRUE),
       
@@ -138,6 +139,17 @@ ui <- dashboardPage(
             "latitude",
             "Y or Latitude:",
             value = NA
+          ),
+          
+          tags$div(
+            style = "display:flex; justify-content:flex-end; margin-top:8px;",
+            
+            actionButton(
+              "clear_single",
+              "Clear inputs",
+              icon = icon("trash"),
+              style = "color:#3D474C; background-color:#F4F4F4; border:none;"
+            )
           )
         )
       ),
@@ -179,16 +191,20 @@ ui <- dashboardPage(
           class = "box-body",
           style = "display:none;",
           
-          fileInput(
-            "upload",
-            "Upload a file (.csv, .txt, .geojson)",
-            accept = c(".csv", ".txt", ".geojson")
-          ),
+          #fileInput(
+          #  "upload",
+          #  "Upload a file (.csv, .txt, .geojson)",
+          #  accept = c(".csv", ".txt", ".geojson")
+          #),
+          uiOutput("upload_ui"),
           
-          checkboxInput(
-            "header",
-            "Column headers",
-            TRUE
+          tags$div(
+            style = "margin-top: -35px; margin-bottom: 0px;",
+            checkboxInput(
+              "header",
+              label = "Column headers",
+              value = TRUE
+            )
           ),
           
           selectInput(
@@ -224,6 +240,17 @@ ui <- dashboardPage(
               "UTM Zone 11N"
             ),
             selected = "Choose"
+          ),
+          
+          tags$div(
+            style = "display:flex; justify-content:flex-end; margin-top:8px;",
+            
+            actionButton(
+              "clear_batch",
+              "Clear inputs",
+              icon = icon("trash"),
+              style = "color:#3D474C; background-color:#F4F4F4; border:none;"
+            )
           )
         )
       ),
@@ -282,17 +309,28 @@ ui <- dashboardPage(
           class = "box-body",
           style = "display:none;",
           
-          fileInput(placeholder = "shp,dbf,shx", #width = 185 ,
-                    inputId = "filemap", 
-                    label = "Upload Shapefile", multiple = TRUE, 
-                    accept = c("shp","dbf", "shx", "sbn", "sbx", "prj", "xml","cpg"))
+          #fileInput(placeholder = "shp,dbf,shx", #width = 185 ,
+          #          inputId = "filemap", 
+          #          label = "Upload Shapefile", multiple = TRUE, 
+          #          accept = c("shp","dbf", "shx", "sbn", "sbx", "prj", "xml","cpg")),
+          uiOutput("file_ui"),
+          
+          tags$div(
+            style = "display:flex; justify-content:flex-end; margin-top:8px;",
+            
+            actionButton(
+              "clear_poly",
+              "Clear inputs",
+              icon = icon("trash"),
+              style = "color:#3D474C; background-color:#F4F4F4; border:none;"
+            )
+          )
         )
       ),
       
       br(),
-      br(),
       
-      menuItem(text = "About", icon = icon("circle-info"), tabName = "about"),
+      #menuItem(text = "About", icon = icon("circle-info"), tabName = "about"),
       menuItem(text = "Example", icon = icon("glasses"), tabName = "example")#,
       #menuItem(text = "Read Me", icon = icon("book"))
     )
@@ -322,7 +360,10 @@ ui <- dashboardPage(
       uiOutput("uploaded_preview_ui"),
       uiOutput("polygon_preview_ui"),
       br()
-    )
+    ),
+    
+    br(),
+    br(),
       
     ),
     
