@@ -12,22 +12,36 @@ server <- function(input, output, session) {
     
     if (is.null(input$species) || input$species == "") return()
     
+    withProgress(message = "Downloading raster...", value = 0, {
+      
+      incProgress(0.3)
+    
     pspl_status("Downloading raster...")
     species <- input$species
     pspl <- rast(paste0("https://www.for.gov.bc.ca/ftp/HTS/external/!publish/Provincial_Site_Productivity_Layer/version_9/Rasters/",
                         species,"_si_pspl_9.tif")
     )
     rv$r <- pspl   # or direct rast()
+    })
     
   })
   
   observeEvent(rv$r, {
     
     pspl_status("Downloading raster...")
+    withProgress(message = "Processing raster...", value = 0, {
+      
+      incProgress(0.5)
     
     rv$r2 <- aggregate(rv$r, fact = 10)
+    
+    incProgress(0.8)
+    
     rv$r2 <- leaflet::projectRasterForLeaflet(rv$r2, method = "near")
     
+    incProgress(0.8, detail = "Done")
+    
+    })
   })
   
   output$pspl_status <- renderText({
@@ -125,15 +139,7 @@ server <- function(input, output, session) {
     
     df <- data.frame(x = input$longitude, y = input$latitude)
     
-    crs_df <- case_when(input$crs == "EPSG:4326" ~ 4326,
-                        input$crs == "EPSG:3005" ~ 3005,
-                        input$crs == "BC Albers" ~ 3005,
-                        input$crs == "UTM Zone 7" ~ 3154,
-                        input$crs == "UTM Zone 8" ~ 3155,
-                        input$crs == "UTM Zone 9" ~ 3156,
-                        input$crs == "UTM Zone 10" ~ 3157,
-                        input$crs == "UTM Zone 11" ~ 2955,
-                        TRUE ~ 3005)
+    crs_df <- get_crs(input$crs)
     
     coords_sf <- st_as_sf(df, coords = c("x", "y"), crs = crs_df)
     return(coords_sf)
@@ -158,39 +164,37 @@ server <- function(input, output, session) {
     
     coord_pspl <- st_transform(coords_sf, crs = 3005)
     
-    entered_coord_pspl <- extract(pspl, coord_pspl, sp = T)
-    return(entered_coord_pspl)
+    withProgress(message = "Extracting values...", value = 0, {
+      
+      incProgress(0.4)
     
+    entered_coord_pspl <- extract(pspl, coord_pspl, sp = T)
+    
+    incProgress(0.8)
+    })
+    return(entered_coord_pspl)
   })
   
   observe({
-    
-    df <- df_pspl()
   
     coord <- if (
-      !is.null(df) 
+      !is.null(df_pspl()) 
     ) {
-      
-      crs_df <- case_when(input$crs_batch == "EPSG:4326" ~ 4326,
-                          input$crs_batch == "EPSG:3005" ~ 3005,
-                          input$crs_batch == "BC Albers" ~ 3005,
-                          input$crs_batch == "UTM Zone 7" ~ 3154,
-                          input$crs_batch == "UTM Zone 8" ~ 3155,
-                          input$crs_batch == "UTM Zone 9" ~ 3156,
-                          input$crs_batch == "UTM Zone 10" ~ 3157,
-                          input$crs_batch == "UTM Zone 11" ~ 2955,
-                          TRUE ~ 3005)
-      
+      df <- df_pspl()
+      crs_df <- get_crs(input$crs_batch)
       df_sf <- st_as_sf(df,  coords = c("x", "y"), crs = crs_df)
-    df_leaf <- st_transform(df_sf, crs = 4326)
-    df_leaf <- df_leaf %>%
-      dplyr::rename(SI = dplyr::matches("si_pspl_9")) %>%
-      mutate(SI = round(SI, 1))
-    df_leaf
-    } else {
-      merge(entered_coord_leaf(), entered_coord_pspl()) %>%
+      df_leaf <- st_transform(df_sf, crs = 4326)
+      df_leaf <- df_leaf %>%
         dplyr::rename(SI = dplyr::matches("si_pspl_9")) %>%
         mutate(SI = round(SI, 1))
+      df_leaf
+    } else if (
+      !is.null(entered_coord_leaf()) 
+    ) {
+      point_leaf <- merge(entered_coord_leaf(), entered_coord_pspl()) %>%
+        dplyr::rename(SI = dplyr::matches("si_pspl_9")) %>%
+        mutate(SI = round(SI, 1))
+      point_leaf
     }
     
     proxy <- leafletProxy("map")
@@ -215,16 +219,7 @@ server <- function(input, output, session) {
   
   
   output$preview <- renderTable({
-    
-    coord_pspl <- entered_coord_pspl()
-    
-    df = data.frame("x" = paste0(input$longitude),
-                    "y" = paste0(input$latitude),
-                    "CRS" = paste0(input$crs),
-                    "Species" = paste0(toupper(input$species)),
-                    "PSPLv9_SI" = paste0(round(coord_pspl[1,2], 1))
-    )
-    return(df)
+    preview_data()
   })
   
   preview_data <- reactive({
@@ -298,15 +293,7 @@ server <- function(input, output, session) {
     
     pspl <- rv$r
     
-    crs_df <- case_when(input$crs_batch == "EPSG:4326" ~ 4326,
-                        input$crs_batch == "EPSG:3005" ~ 3005,
-                        input$crs_batch == "BC Albers" ~ 3005,
-                        input$crs_batch == "UTM Zone 7" ~ 3154,
-                        input$crs_batch == "UTM Zone 8" ~ 3155,
-                        input$crs_batch == "UTM Zone 9" ~ 3156,
-                        input$crs_batch == "UTM Zone 10" ~ 3157,
-                        input$crs_batch == "UTM Zone 11" ~ 2955,
-                        TRUE ~ 3005)
+    crs_df <- get_crs(input$crs_batch)
     
     df <- df %>% select(input$idcol, x = input$xcol, y = input$ycol)
     
@@ -316,17 +303,28 @@ server <- function(input, output, session) {
     
     df_sf_conv <- st_transform(df_sf, crs = 3005)
     
+    withProgress(message = "Extracting values...", value = 0, {
+      
+      incProgress(0.4)
+      
     df_si <- extract(pspl, df_sf_conv, sp = T)
     
     df <- merge(df, df_si, by = "ID")
     
+    incProgress(0.8)
+    
     df <- setDT(df)[, ID := NULL]
     
+    })
     return(df)
   })
   
   
   output$uploaded_preview <- renderTable({
+    
+    if (isTRUE(input$clear_single)) {
+      return(NULL)
+    }
     df <- df_pspl() %>% select(-x, -y)
     return(head(df))
   })
@@ -344,6 +342,10 @@ server <- function(input, output, session) {
 
   output$uploaded_preview_ui <- renderUI({
     
+    if (isTRUE(input$clear_batch)) {
+      return(NULL)
+    }
+    
     req(df_pspl())  # replace with your reactive
     
     box(
@@ -358,6 +360,64 @@ server <- function(input, output, session) {
       )
     )
   })
+  
+  
+  output$upload_ui <- renderUI({
+    fileInput("upload", "Upload a file (.csv, .txt, .geojson)",
+              accept = c(".csv", ".txt", ".geojson"))
+  })
+  
+  
+  observeEvent(input$clear_batch, {
+    
+    # reset file upload
+    #shiny::resetFileInput(session, "upload")
+    
+    output$upload_ui <- renderUI({
+      fileInput("upload", "Upload a file (.csv, .txt, .geojson)",
+                accept = c(".csv", ".txt", ".geojson"))
+    })
+    
+    
+    # reset selects
+    updateSelectInput(session, "idcol", choices = "", selected = "")
+    updateSelectInput(session, "xcol", choices = "", selected = "")
+    updateSelectInput(session, "ycol", choices = "", selected = "")
+    updateSelectInput(session, "crs_batch", selected = "")
+    
+  })
+  
+  
+  observeEvent(input$clear_single, {
+    
+    # reset selects
+    updateSelectInput(session, "crs", choices = "", selected = "")
+    numericInput(session, "longitude", value = NULL)
+    numericInput(session, "latitude", value = NULL)
+    
+  })
+  
+  output$file_ui <- renderUI({
+    fileInput("filemap", "Upload Shapefile", multiple = TRUE)
+  })
+  
+  rv <- reactiveValues(
+    poly_reset = FALSE
+  )
+  
+  observeEvent(input$clear_poly, {
+    rv$poly_reset <- TRUE
+    
+    output$file_ui <- renderUI({
+      fileInput("filemap", "Upload Shapefile", multiple = TRUE)
+    })
+    
+    leafletProxy("map") %>%
+      clearGroup("imp")
+    rv$poly_reset <- FALSE 
+    
+  })
+  
   
   # Modal for labeling the drawn polygons
   warningModal = modalDialog(
@@ -433,19 +493,27 @@ server <- function(input, output, session) {
     
     poly1_conv <- st_transform(poly1, crs = 3005)
     
+    withProgress(message = "Extracting values...", value = 0, {
+      
+      incProgress(0.4)
+      
     poly_si <- extract(pspl, poly1_conv, fun = mean, na.rm = TRUE)
+    
+    incProgress(0.8)
+    })
     
     return(poly_si)
   })
   
   
   output$polygon_preview <- renderTable({
+    
     df <- poly_pspl()
   })
   
   output$polygon_preview_ui <- renderUI({
     
-    req(poly_pspl())  # or nrow(...) > 0 logic
+    req(poly_pspl())  
     
     box(
       title = "Mean PSPL from uploaded polygon",
@@ -460,5 +528,3 @@ server <- function(input, output, session) {
   })
   
 }
-
-
