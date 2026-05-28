@@ -168,7 +168,7 @@ server <- function(input, output, session) {
       
       incProgress(0.4)
     
-    entered_coord_pspl <- extract(pspl, coord_pspl, sp = T)
+    entered_coord_pspl <- terra::extract(pspl, coord_pspl, sp = T)
     
     incProgress(0.8)
     })
@@ -307,7 +307,7 @@ server <- function(input, output, session) {
       
       incProgress(0.4)
       
-    df_si <- extract(pspl, df_sf_conv, sp = T)
+    df_si <- terra::extract(pspl, df_sf_conv)
     
     df <- merge(df, df_si, by = "ID")
     
@@ -322,15 +322,12 @@ server <- function(input, output, session) {
   
   output$uploaded_preview <- renderTable({
     
-    if (isTRUE(input$clear_single)) {
-      return(NULL)
-    }
     df <- df_pspl() %>% select(-x, -y)
     return(head(df))
   })
   
   
-  output$download <- downloadHandler(
+  output$download1 <- downloadHandler(
     
     filename = function() {
       paste0("PSPLv9_", input$species, "_", Sys.Date(), ".csv")
@@ -342,10 +339,6 @@ server <- function(input, output, session) {
 
   output$uploaded_preview_ui <- renderUI({
     
-    if (isTRUE(input$clear_batch)) {
-      return(NULL)
-    }
-    
     req(df_pspl())  # replace with your reactive
     
     box(
@@ -353,7 +346,7 @@ server <- function(input, output, session) {
       width = 6,
       tableOutput("uploaded_preview"),
       downloadButton(
-        "download",
+        "download1",
         "Download output",
         style = "color: #fff; background-color: #27ae60;
                border-color: #fff;padding: 5px 14px;margin: 5px;"
@@ -370,14 +363,10 @@ server <- function(input, output, session) {
   
   observeEvent(input$clear_batch, {
     
-    # reset file upload
-    #shiny::resetFileInput(session, "upload")
-    
     output$upload_ui <- renderUI({
       fileInput("upload", "Upload a file (.csv, .txt, .geojson)",
                 accept = c(".csv", ".txt", ".geojson"))
     })
-    
     
     # reset selects
     updateSelectInput(session, "idcol", choices = "", selected = "")
@@ -385,15 +374,17 @@ server <- function(input, output, session) {
     updateSelectInput(session, "ycol", choices = "", selected = "")
     updateSelectInput(session, "crs_batch", selected = "")
     
+    leafletProxy("map") %>%
+      clearGroup("imp")
   })
   
   
   observeEvent(input$clear_single, {
     
     # reset selects
-    updateSelectInput(session, "crs", choices = "", selected = "")
-    numericInput(session, "longitude", value = NULL)
-    numericInput(session, "latitude", value = NULL)
+    updateSelectInput(session, "crs", selected = "")
+    updateNumericInput(session, "longitude", value = NA)
+    updateNumericInput(session, "latitude", value = NA)
     
   })
   
@@ -495,11 +486,12 @@ server <- function(input, output, session) {
     
     withProgress(message = "Extracting values...", value = 0, {
       
-      incProgress(0.4)
+      incProgress(0.2)
       
-    poly_si <- extract(pspl, poly1_conv, fun = mean, na.rm = TRUE)
+    poly_si <- terra::extract(pspl, poly1_conv, fun = mean, na.rm = TRUE)
     
     incProgress(0.8)
+    
     })
     
     return(poly_si)
@@ -513,10 +505,11 @@ server <- function(input, output, session) {
   
   output$polygon_preview_ui <- renderUI({
     
+    req(input$filemap)
     req(poly_pspl())  
     
     box(
-      title = "Mean PSPL from uploaded polygon",
+      title = "Mean PSPL of uploaded polygon",
       width = 6,
       tableOutput("polygon_preview")
     )

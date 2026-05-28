@@ -5,6 +5,7 @@ library(data.table)
 library(dplyr)
 library(sf)
 library(terra)
+library(raster)
 library(leaflet)
 
 get_crs <- function(crs_name){
