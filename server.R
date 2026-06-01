@@ -92,7 +92,7 @@ server <- function(input, output, session) {
         
         rv$agg_cache[[species]] <- leaflet::projectRasterForLeaflet(terra::aggregate(rv$r, fact = 10), method = "near")
         
-        incProgress(1, detail = "Done")
+        incProgress(0.8, detail = "Done")
       })
     }
     
