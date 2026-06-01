@@ -328,10 +328,10 @@ ui <- dashboardPage(
         )
       ),
       
-      br(),
+      br()#,
       
       #menuItem(text = "About", icon = icon("circle-info"), tabName = "about"),
-      menuItem(text = "Example", icon = icon("glasses"), tabName = "example")#,
+      #menuItem(text = "Example", icon = icon("glasses"), tabName = "example")#,
       #menuItem(text = "Read Me", icon = icon("book"))
     )
   ),

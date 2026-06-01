@@ -2,10 +2,11 @@
 library(shiny)
 library(shinydashboard)
 library(data.table)
+library(DT)
 library(dplyr)
 library(sf)
 library(terra)
-library(raster)
+#library(raster)
 library(leaflet)
 
 get_crs <- function(crs_name){
