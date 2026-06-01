@@ -42,7 +42,7 @@ ui <- dashboardPage(
     margin-bottom: 3px;
     padding: 6px 3px;
 
-    border: 1px solid #d2d6de;
+    border: 1px solid #fcba19;
     border-radius: 6px;
     background-color: #3D474C;
 
@@ -53,7 +53,7 @@ ui <- dashboardPage(
   ",
       selectizeInput(
         inputId = "species",
-        label = "Choose Species:",
+        label = "Select Species:",
         selected = NULL,
         choices = c(
           "Choose" = "",
@@ -328,10 +328,10 @@ ui <- dashboardPage(
         )
       ),
       
-      br(),
+      br()#,
       
       #menuItem(text = "About", icon = icon("circle-info"), tabName = "about"),
-      menuItem(text = "Example", icon = icon("glasses"), tabName = "example")#,
+      #menuItem(text = "Example", icon = icon("glasses"), tabName = "example")#,
       #menuItem(text = "Read Me", icon = icon("book"))
     )
   ),
@@ -388,32 +388,136 @@ ui <- dashboardPage(
     )
     ),
     
+ #   tags$footer(
+ #     class = "main-footer",
+ #     style = "
+ #   background-color: #036;
+ #   color: #fff;
+ #   border-top: 2px solid #fcba19;
+ #   position:absolute;
+ #             bottom:0;
+ #             width:100%;
+ #             height:50px;   /* Height of the footer */
+ #             
+ #             padding: 10px;
+ #             
+ #             z-index: 1000;
+ #             left: 0px;
+ # ",
+ #     div(
+ #       style = "display: flex;
+ #     justify-content: center;
+ #     align-items: center;
+ #     width: 100%;
+ #     white-space: nowrap;
+ #     font-size: 16px;",
+ #       HTML(
+ #         "<strong>PSPL Extractor</strong> | Provincial Site Productivity Layer v9"
+ #       )
+ #     )
+ #   )
+    
     tags$footer(
       class = "main-footer",
       style = "
     background-color: #036;
     color: #fff;
     border-top: 2px solid #fcba19;
-    position:absolute;
-              bottom:0;
-              width:100%;
-              height:50px;   /* Height of the footer */
-              
-              padding: 10px;
-              
-              z-index: 1000;
-              left: 0px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    min-height: 50px;
+    padding: 10px 20px;
+    z-index: 1000;
+    left: 0;
+    box-sizing: border-box;
   ",
+      
       div(
-        style = "display: flex;
-      justify-content: center;
-      align-items: center;
+        class = "container",
+        style = "
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 5px;
       width: 100%;
-      white-space: nowrap;
-      font-size: 16px;",
-        HTML(
-          "<strong>PSPL Extractor</strong> | Provincial Site Productivity Layer v9"
-        )
+    ",
+        
+        # Footer links
+        tags$ul(
+          style = "
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+      ",
+          
+          tags$li(
+            tags$a(
+              href = "//www2.gov.bc.ca/gov/content/industry/forestry/managing-our-forest-resources/forest-inventory/ground-sample-inventories",
+              target = "_blank",
+              style = "color: #fff; text-decoration: none;",
+              "Home"
+            )
+          ),
+          
+          tags$li(
+            tags$a(
+              href = "//www2.gov.bc.ca/gov/content/home/disclaimer",
+              target = "_blank",
+              style = "color: #fff; text-decoration: none;",
+              "Disclaimer"
+            )
+          ),
+          
+          tags$li(
+            tags$a(
+              href = "//www2.gov.bc.ca/gov/content/home/privacy",
+              target = "_blank",
+              style = "color: #fff; text-decoration: none;",
+              "Privacy"
+            )
+          ),
+          
+          tags$li(
+            tags$a(
+              href = "//www2.gov.bc.ca/gov/content/home/accessibility",
+              target = "_blank",
+              style = "color: #fff; text-decoration: none;",
+              "Accessibility"
+            )
+          ),
+          
+          tags$li(
+            tags$a(
+              href = "//www2.gov.bc.ca/gov/content/home/copyright",
+              target = "_blank",
+              style = "color: #fff; text-decoration: none;",
+              "Copyright"
+            )
+          ),
+          
+          tags$li(
+            tags$a(
+              href = "//www2.gov.bc.ca/gov/content/industry/forestry/managing-our-forest-resources/forest-inventory/ground-sample-inventories",
+              target = "_blank",
+              style = "color: #fff; text-decoration: none;",
+              "Contact Us"
+            )
+          )
+        ),
+      #  # Left text
+      #  div(
+      #    style = "
+      #  white-space: nowrap;
+      #  font-size: 16px;
+      #",
+      #    HTML("<strong>Provincial Site Productivity Layer v9</strong>")
+      #  ),
+        
       )
     )
 )

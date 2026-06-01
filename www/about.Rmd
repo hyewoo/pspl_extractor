@@ -1,6 +1,10 @@
 ---
 title: "Provincial Site Productivity Layer Version 9.0"
-output: html_document
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    number_sections: false
 ---
 
 ```{r setup, include=FALSE}
@@ -26,11 +30,80 @@ For more info, visit [Provincial Site Productivity Layer webpage](https://www2.g
 
 ## Purpose of Web App
 
-This web-based application was developed to facilitate custom queries and downloads of PSPL v.9.0 estimates for user-defined locations or areas of interest.  
+This web-based application was developed to facilitate custom queries and downloads of PSPL v.9.0 estimates for user-defined locations or areas of interest.  For complex analyses or large datasets, it is recommended to download the PSPL layers and perform processing in a local GIS or statistical environment.  
+
+-  Users can specify a **single point** location to extract PSPL estimates, or upload a **list of points** for batch extraction.  
+-  Users can upload a **spatial polygon** (*.shp*) to compute the mean PSPL value within a defined area.  
+-  The maximum file size for uploading a list of points or a shapefileis is **30 MB**.  
+-  Large input files or polygons covering extensive areas may require longer processing times.  
 
 
-### How to Use
+## User guide
+
+Activate the **Application tab** ![](application.png) by clicking it. 
+
+Select the **Species** of interest from the drop-down menu.  It may take a few seconds to load the PSPL raster layer. 
+
+![](basic.png){width=80%}
+<br>
+<br>
+
+### 1. Extract PSPL value of single point  
 
 
+Unfold **Enter Coordinate** box by clicking the toggle on the right.  ![](single.png)  
+
+Enter the x-coordinate, y-coordinate, and coordinate reference system (CRS) of the location of interest. 
+
+The application will begin extracting the PSPL value for the specified coordinate. This may take a few seconds.  
+
+The result will be displayed below the map.  
+
+![](singleresult.png){width=80%}
+ 
+ <br>
+ 
+ 
+### 2. Batch extract PSPL values from a list of coordinates  
+ 
+Unfold **Upload Batch Coordinates** box by clicking the toggle on the right.  ![](batch.png)  
+
+Upload a file containing list of coordinates (*.csv, .txt, or .geojson*). The file should contain columns of x-coordinate, y-coordinate, and an ID column for each row.  For example:  
 
 
+![](samplelist1.png){width=35%} ![](samplelist2.png){width=55%}
+
+
+ 
+ After the file is uploaded, specify columns with of ID, x-coordinate, and y-coordinate from the drop-down button. Also select the CRS of the coordinate columns.  
+ 
+The application will begin extracting the PSPL value, and the result will be displayed below the map.  
+
+![](batchresult.png){width=80%}
+
+
+The list of extracted PSPL values can be downloaded via Download button.  ![](download.png)
+ 
+ <br>
+ 
+### 3. Extract mean PSPL value within a polygon map
+ 
+ 
+Unfold **Upload Polygon** box by clicking the toggle on the right.  ![](poly.png)  
+
+Upload all required components of a valid shapefile, including at minimum the *.shp, .shx, .dbf*, and *.prj* files. For example:  
+
+![](polyupload.png){width=80%}
+
+Once uploaded, the application will extract PSPL values within the polygon and compute the **mean of all raster cells whose centroids fall inside the polygon boundaries**.  
+
+If the shapefile contains multiple polygons, PSPL values will be summarized separately for each polygon.  
+ 
+The resulting extracted and summarized PSPL values can be downloaded using the Download button.  ![](download.png)
+ 
+
+![](polyresult2.png){width=80%}
+ 
+<br>
+<br>
+<br>
