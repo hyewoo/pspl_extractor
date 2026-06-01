@@ -339,6 +339,19 @@ ui <- dashboardPage(
   
   dashboardBody(
     
+    tags$head(tags$style(HTML("
+      /* Constrain the main body width and center it */
+      .content-wrapper, .right-side {
+        max-width: 1200px;
+        margin-left: fixed;
+        margin-right: auto;
+      }
+  .skin-blue .wrapper {
+  background-color: #ECF0F5;
+}
+
+    "))),
+    
     includeCSS("bcgov_01.css"),
     #use_waiter(),
     tabItems(
