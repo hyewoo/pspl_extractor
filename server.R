@@ -129,7 +129,7 @@ server <- function(input, output, session) {
     # always remove previous raster + legend safely
     proxy %>%
       clearGroup("pspl") %>%
-      clearGroup("imp") %>%
+      #clearGroup("imp") %>%
       clearControls()
     
     # if nothing selected → just show basemap
@@ -686,7 +686,10 @@ server <- function(input, output, session) {
     req(poly_pspl())
     
     box(
-      title = "Mean PSPL from uploaded polygon",
+      title =  tags$span(
+        style = "color:black; font-weight:700; font-size:16px;",
+        "Mean PSPL from uploaded polygon"
+      ),
       width = 6,
       DTOutput("polygon_preview"),
       downloadButton(
