@@ -17,7 +17,7 @@ The **Provincial Site Productivity Layer (PSPL)** provides **area-based site ind
 
 PSPL v.9.0 adopts a machine learning-based *Random Forest (RF) modelling approach* that incorporates climatic, topographic, and ecosystem classification predictor variables. More than 13,000 ground-based site index observations from *FAIB ground sampling inventories, Site Index Biogeoclimatic Ecosystem Classification (SIBEC), and Site Index Adjustment (SIA) projects* were used to develop and validate the models. Validation results demonstrated that PSPL v.9.0 outperformed the previous v.8.0 in site index prediction accuracy for all species except black spruce, with particularly strong improvements for key commercial species including *Douglas-fir, lodgepole pine, western hemlock, western redcedar, and subalpine fir*. The new PSPL also establishes a reproducible and scalable predictive modelling framework that provides wall-to-wall coverage across BC at a **100 × 100 m spatial resolution**.
 
-### Application
+## Application
 
 The PSPL is intended for use in strategic-level analyses. Users must understand the limitations of the latest model behind the PSPL and its validation results when applying its estimates:   
 
