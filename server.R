@@ -7,50 +7,12 @@ server <- function(input, output, session) {
   
   pspl_status <- reactiveVal("")
   
-  #rv <- reactiveValues(r = NULL, r2 = NULL)
-  
   rv <- reactiveValues(
     r = NULL,
     r2 = NULL,
     raster_cache = list(),
     agg_cache = list()
   )
-  
-  #observeEvent(input$species, {
-  #  
-  #  if (is.null(input$species) || input$species == "") return()
-  #  
-  #  withProgress(message = "Downloading raster...", value = 0, {
-  #    
-  #    incProgress(0.3)
-  #  
-  #  #pspl_status("Downloading raster...")
-  #  species <- input$species
-  #  pspl <- rast(paste0("https://www.for.gov.bc.ca/ftp/HTS/external/!publish/Provincial_Site_Productivity_Layer/version_9/Rasters/",
-  #                      species,"_si_pspl_9.tif")
-  #  )
-  #  rv$r <- pspl   # or direct rast()
-  #  })
-  #  
-  #})
-  #
-  #observeEvent(rv$r, {
-  #  
-  #  #pspl_status("Downloading raster...")
-  #  withProgress(message = "Processing raster...", value = 0, {
-  #    
-  #    incProgress(0.5)
-  #  
-  #  rv$r2 <- aggregate(rv$r, fact = 10)
-  #  
-  #  incProgress(0.8)
-  #  
-  #  rv$r2 <- leaflet::projectRasterForLeaflet(rv$r2, method = "near")
-  #  
-  #  incProgress(0.8, detail = "Done")
-  #  
-  #  })
-  #})
   
   observeEvent(input$species, {
     
@@ -129,7 +91,6 @@ server <- function(input, output, session) {
     # always remove previous raster + legend safely
     proxy %>%
       clearGroup("pspl") %>%
-      #clearGroup("imp") %>%
       clearControls()
     
     # if nothing selected → just show basemap
@@ -157,6 +118,46 @@ server <- function(input, output, session) {
         values = values(rv$r2, na.rm = TRUE),
         title = paste0(toupper(input$species), " PSPL v9"),
         position = "bottomright"
+      ) %>%
+      #addControl(
+      #  html = HTML(
+      #    paste0(
+      #      "<div style='
+      #      background: rgba(255,255,255,0.5);
+      #      padding: 8px 12px;
+      #      font-size: 12px;
+      #      max-width: 250px;
+      #border: none;
+      #box-shadow: none;
+      #    border-radius: 6px;'>
+      #      Layers displayed on the map are resampled to a coarser resolution to 
+      #      improve performance and reduce loading time. All PSPL value extractions 
+      #      and downloads are derived from the original-resolution data and are 
+      #      not affected by the display resampling.
+      #    </div>"
+      #    )
+      #  ),
+      #  position = "bottomleft",
+      #  className = "info-text"
+      #)  %>%
+      addControl(
+        html = HTML(
+          paste0(
+            "<div style='
+        background: rgba(255,255,255,0.85);
+            padding: 8px 12px;
+            font-size: 16px;
+            max-width: 250px;
+      border: none;
+      box-shadow: none;
+          border-radius: 6px;
+        font-weight: bold;'>
+        Species: ", toupper(input$species), "
+      </div>"
+          )
+        ),
+        position = "topright",
+        className = "info-text"
       )
     
     #pspl_status("")
@@ -231,31 +232,6 @@ server <- function(input, output, session) {
     return(entered_coord_pspl)
   })
   
-  
-  #observeEvent(entered_coord_leaf(), {
-  #  
-  #  proxy <- leafletProxy("map")
-  #  
-  #  # remove old polygons
-  #  proxy %>%
-  #    #clearGroup("imp") %>%
-  #    clearGroup("coords")
-  #  
-  #  coord_pspl <- entered_coord_leaf()
-  #  
-  #  # stop here if unchecked
-  #  if (!isTRUE(input$show_coords) || is.null(coord)) {
-  #    return()
-  #  }
-  #  
-  #  # add marker
-  #  proxy %>%
-  #    addMarkers(
-  #      data = coord_pspl,
-  #      group = "coords",
-  #      popup =  ~as.character(SI)
-  #    )
-  #})
   observe({
     
     pspl1 <- entered_coord_pspl()
@@ -304,53 +280,6 @@ server <- function(input, output, session) {
     )
   })
   
-  #observe({
-  #  
-  #  leaf1 <- entered_coord_leaf()
-  #  pspl1 <- entered_coord_pspl()
-  #  df1   <- df_pspl()
-  #  
-  #  coord <- NULL
-  #  
-  #      # PRIORITY 1: interactive point
-  #  if (NROW(pspl1) > 0) {
-  #    
-  #    coord <- cbind(leaf1, pspl1) %>%
-  #      dplyr::rename(SI = dplyr::matches("si_pspl_9")) %>%
-  #      dplyr::mutate(SI = round(SI, 1))
-  #    
-  #    # PRIORITY 2: batch dataframe
-  #  } else if (NROW(df1) > 0) {
-  #    
-  #    crs_df <- get_crs(input$crs_batch)
-  #    
-  #    coord <- st_as_sf(df1, coords = c("x", "y"), crs = crs_df) %>%
-  #      st_transform(4326) %>%
-  #      dplyr::rename(SI = dplyr::matches("si_pspl_9")) %>%
-  #      dplyr::mutate(SI = round(SI, 1))
-  #  }
-  #  
-  #  proxy <- leafletProxy("map")
-  #  
-  #  # always clear previous coordinate marker
-  #  proxy %>%
-  #    clearGroup("coords")
-  #  
-  #  # stop here if unchecked
-  #  if (!isTRUE(input$show_coords) || is.null(coord)) {
-  #    return()
-  #  }
-  #  
-  #  # add marker
-  #  proxy %>%
-  #    addMarkers(
-  #      data = coord,
-  #      group = "coords",
-  #      popup =  ~as.character(SI)
-  #    )
-  #})
-  
-  
   output$preview <- renderTable({
     preview_data()
   })
@@ -373,7 +302,10 @@ server <- function(input, output, session) {
     req(preview_data()) 
     
     box(
-      title = "PSPL value of entered coordinate",
+      title =  tags$span(
+        style = "color:black; font-weight:700; font-size:16px;",
+        "PSPL value of entered coordinate"
+      ),
       width = 6,
       tableOutput("preview")
     )
@@ -399,9 +331,7 @@ server <- function(input, output, session) {
   
   #Observe file being selected
   observeEvent(input$upload, {
-    #session = getDefaultReactiveDomain(),
     
-    #Store loaded data in reactive
     uploaded <- uploaded_data()
     
     selectif <- function(varname){
@@ -478,7 +408,10 @@ server <- function(input, output, session) {
     req(df_pspl())  # replace with your reactive
     
     box(
-      title = "PSPL of batch coordinates",
+      title =  tags$span(
+        style = "color:black; font-weight:700; font-size:16px;",
+        "PSPL of batch coordinates"
+      ),
       width = 6,
       DTOutput("uploaded_preview"),
       downloadButton(
@@ -527,10 +460,6 @@ server <- function(input, output, session) {
   output$file_ui <- renderUI({
     fileInput("filemap", "Upload Shapefile", multiple = TRUE)
   })
-  
-  #rv <- reactiveValues(
-  #  poly_reset = 0
-  #)
   
   
   # Modal for labeling the drawn polygons
@@ -664,7 +593,6 @@ server <- function(input, output, session) {
     leafletProxy("map") %>%
       clearGroup("imp")
     
-    #output$polygon_preview <- renderDT(NULL)
   })
   
   output$polygon_preview <- renderDT({

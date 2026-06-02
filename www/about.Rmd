@@ -17,7 +17,7 @@ The **Provincial Site Productivity Layer (PSPL)** provides **area-based site ind
 
 PSPL v.9.0 adopts a machine learning-based *Random Forest (RF) modelling approach* that incorporates climatic, topographic, and ecosystem classification predictor variables. More than 13,000 ground-based site index observations from *FAIB ground sampling inventories, Site Index Biogeoclimatic Ecosystem Classification (SIBEC), and Site Index Adjustment (SIA) projects* were used to develop and validate the models. Validation results demonstrated that PSPL v.9.0 outperformed the previous v.8.0 in site index prediction accuracy for all species except black spruce, with particularly strong improvements for key commercial species including *Douglas-fir, lodgepole pine, western hemlock, western redcedar, and subalpine fir*. The new PSPL also establishes a reproducible and scalable predictive modelling framework that provides wall-to-wall coverage across BC at a **100 × 100 m spatial resolution**.
 
-### Application
+## Application
 
 The PSPL is intended for use in strategic-level analyses. Users must understand the limitations of the latest model behind the PSPL and its validation results when applying its estimates:   
 
@@ -48,6 +48,10 @@ This web-based application was developed to facilitate custom queries and downlo
 -  Users can upload a **spatial polygon** (*.shp*) to compute the mean PSPL value within a defined area.  
 -  The maximum file size for uploading a list of points or a shapefileis is **30 MB**.  
 -  Large input files or polygons covering extensive areas may require longer processing times.  
+-  Layers displayed on the map are resampled to a coarser resolution to 
+            improve performance and reduce loading time. All PSPL value extractions 
+            and downloads are derived from the original-resolution data and are 
+            not affected by the display resampling.  
 
 
 ## User Guide
@@ -80,7 +84,7 @@ The result will be displayed below the map.
  
 Unfold **Upload Batch Coordinates** box by clicking the toggle on the right.  ![](batch.png)  
 
-Upload a file containing list of coordinates (*.csv, .txt, or .geojson*). The file should contain columns of x-coordinate, y-coordinate, and an ID column for each row.  For example:  
+Upload a file containing list of coordinates (*.csv, .txt, or .geojson*). The file should contain columns of x-coordinate, y-coordinate, and an ID column unique for each row.  For example:  
 
 
 ![](samplelist1.png){width=35%} ![](samplelist2.png){width=55%}
