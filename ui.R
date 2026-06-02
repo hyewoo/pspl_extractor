@@ -349,7 +349,11 @@ ui <- dashboardPage(
   .skin-blue .wrapper {
   background-color: #ECF0F5;
 }
-
+.info-text {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
     "))),
     
     includeCSS("bcgov_01.css"),
