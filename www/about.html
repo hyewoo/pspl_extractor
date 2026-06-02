@@ -355,12 +355,15 @@ display: none;
 
 <div id="TOC">
 <ul>
-<li><a href="#background" id="toc-background">Background</a></li>
+<li><a href="#background" id="toc-background">Background</a>
+<ul>
+<li><a href="#application" id="toc-application">Application</a></li>
+</ul></li>
 <li><a href="#open-data" id="toc-open-data">Open Data</a></li>
 <li><a href="#references" id="toc-references">References</a></li>
 <li><a href="#purpose-of-web-app" id="toc-purpose-of-web-app">Purpose of
 Web App</a></li>
-<li><a href="#user-guide" id="toc-user-guide">User guide</a>
+<li><a href="#user-guide" id="toc-user-guide">User Guide</a>
 <ul>
 <li><a href="#extract-pspl-value-of-single-point" id="toc-extract-pspl-value-of-single-point">1. Extract PSPL value of
 single point</a></li>
@@ -396,6 +399,39 @@ western hemlock, western redcedar, and subalpine fir</em>. The new PSPL
 also establishes a reproducible and scalable predictive modelling
 framework that provides wall-to-wall coverage across BC at a <strong>100
 × 100 m spatial resolution</strong>.</p>
+<div id="application" class="section level3">
+<h3>Application</h3>
+<p>The PSPL is intended for use in strategic-level analyses. Users must
+understand the limitations of the latest model behind the PSPL and its
+validation results when applying its estimates:</p>
+<ul>
+<li><p>A SI estimate for each species is given for every single 1 ha
+pixel in the province. Analysts must ensure that SI is applied only
+where the species is present or suitable.</p></li>
+<li><p>SI predictions are given at a 1 ha resolution, and have been
+developed from predictors at a similarly coarse resolution. Coarse
+predictor resolutions smooth over the fine-scale variation in
+environmental variables that drive stand-level productivity
+differences.<br />
+</p></li>
+<li><p>The PSPL’s random forest SI predictions are averages across
+multiple decision trees, which systematically pulls predictions toward
+the centre of the distribution — overestimating low SI sites and
+underestimating high SI sites. This bias was partially addressed during
+model development, but residual bias at the extremes means estimates for
+the least and most productive sites carry the greatest
+uncertainty.</p></li>
+</ul>
+<p>The PSPL is currently the best available source for site productivity
+estimates at the provincial scale. It is a strategic-level planning
+tool, intended to estimate potential site productivity in existing and
+future managed stands in timber supply modelling and related forest
+planning applications, where the effect of the errors is reduced over a
+larger analysis area. It is not suitable for stand-level or operational
+decision-making. Where a suitable ground-based SI measurement is
+available, that measurement becomes the best available information for
+that site.</p>
+</div>
 </div>
 <div id="open-data" class="section level2">
 <h2>Open Data</h2>
@@ -431,7 +467,7 @@ longer processing times.</li>
 </ul>
 </div>
 <div id="user-guide" class="section level2">
-<h2>User guide</h2>
+<h2>User Guide</h2>
 <p>Activate the <strong>Application tab</strong> <img role="img" src="data:image/png;base64,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" /> by clicking it.</p>
 <p>Select the <strong>Species</strong> of interest from the drop-down
 menu. It may take a few seconds to load the PSPL raster layer.</p>

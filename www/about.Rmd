@@ -17,6 +17,18 @@ The **Provincial Site Productivity Layer (PSPL)** provides **area-based site ind
 
 PSPL v.9.0 adopts a machine learning-based *Random Forest (RF) modelling approach* that incorporates climatic, topographic, and ecosystem classification predictor variables. More than 13,000 ground-based site index observations from *FAIB ground sampling inventories, Site Index Biogeoclimatic Ecosystem Classification (SIBEC), and Site Index Adjustment (SIA) projects* were used to develop and validate the models. Validation results demonstrated that PSPL v.9.0 outperformed the previous v.8.0 in site index prediction accuracy for all species except black spruce, with particularly strong improvements for key commercial species including *Douglas-fir, lodgepole pine, western hemlock, western redcedar, and subalpine fir*. The new PSPL also establishes a reproducible and scalable predictive modelling framework that provides wall-to-wall coverage across BC at a **100 × 100 m spatial resolution**.
 
+### Application
+
+The PSPL is intended for use in strategic-level analyses. Users must understand the limitations of the latest model behind the PSPL and its validation results when applying its estimates:   
+
+-  A SI estimate for each species is given for every single 1 ha pixel in the province. Analysts must ensure that SI is applied only where the species is present or suitable.  
+
+-  SI predictions are given at a 1 ha resolution, and have been developed from predictors at a similarly coarse resolution. Coarse predictor resolutions smooth over the fine-scale variation in environmental variables that drive stand-level productivity differences.  
+-  The PSPL’s random forest SI predictions are averages across multiple decision trees, which systematically pulls predictions toward the centre of the distribution — overestimating low SI sites and underestimating high SI sites. This bias was partially addressed during model development, but residual bias at the extremes means estimates for the least and most productive sites carry the greatest uncertainty.   
+
+
+The PSPL is currently the best available source for site productivity estimates at the provincial scale. It is a strategic-level planning tool, intended to estimate potential site productivity in existing and future managed stands in timber supply modelling and related forest planning applications, where the effect of the errors is reduced over a larger analysis area. It is not suitable for stand-level or operational decision-making. Where a suitable ground-based SI measurement is available, that measurement becomes the best available information for that site.
+
 
 ## Open Data
 
@@ -38,7 +50,7 @@ This web-based application was developed to facilitate custom queries and downlo
 -  Large input files or polygons covering extensive areas may require longer processing times.  
 
 
-## User guide
+## User Guide
 
 Activate the **Application tab** ![](application.png) by clicking it. 
 
