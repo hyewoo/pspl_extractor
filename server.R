@@ -119,27 +119,6 @@ server <- function(input, output, session) {
         title = paste0(toupper(input$species), " PSPL v9"),
         position = "bottomright"
       ) %>%
-      #addControl(
-      #  html = HTML(
-      #    paste0(
-      #      "<div style='
-      #      background: rgba(255,255,255,0.5);
-      #      padding: 8px 12px;
-      #      font-size: 12px;
-      #      max-width: 250px;
-      #border: none;
-      #box-shadow: none;
-      #    border-radius: 6px;'>
-      #      Layers displayed on the map are resampled to a coarser resolution to 
-      #      improve performance and reduce loading time. All PSPL value extractions 
-      #      and downloads are derived from the original-resolution data and are 
-      #      not affected by the display resampling.
-      #    </div>"
-      #    )
-      #  ),
-      #  position = "bottomleft",
-      #  className = "info-text"
-      #)  %>%
       addControl(
         html = HTML(
           paste0(
@@ -164,6 +143,43 @@ server <- function(input, output, session) {
   })
   
   
+  observe({
+    
+    req(input$map_zoom)
+    
+    proxy <- leafletProxy("map")
+    
+    proxy %>%
+      removeControl(layerId = "resample_note")
+    
+    if (input$map_zoom >= 9) {
+      
+      proxy %>%
+        addControl(
+          html = HTML(
+            "<div style='
+             background: rgba(255,255,255,0.5);
+             padding: 8px 12px;
+             font-size: 12px;
+             max-width: 250px;
+       border: none;
+       box-shadow: none;
+           border-radius: 6px;'>
+            PSPL layers displayed on the map are resampled to a coarser resolution to
+            improve performance and reduce loading time. All PSPL value extractions
+            and downloads are derived from the original-resolution data and are
+            not affected by the display resampling.
+          </div>"
+          ),
+          position = "topright",
+          layerId = "resample_note"
+        )
+      
+    }
+    
+  })
+  
+  
   observeEvent(impShp(), {
     
     proxy <- leafletProxy("map")
@@ -177,13 +193,23 @@ server <- function(input, output, session) {
     # guard clause
     if (is.null(shp) || nrow(shp) == 0) return()
     
+    shp <- cbind(shp, poly_pspl())%>%
+      dplyr::rename(SI = dplyr::matches("si_pspl_9")) %>%
+      dplyr::mutate(SI = round(SI, 1))
+    
+    # Create popup text
+    shp$popup_text <- paste0(
+      "<b>ID:</b> ", shp$ID, ", <b>SI: </b> ", shp$SI
+    )
+    
     proxy %>%
       addPolygons(
         data = shp,
         group = "imp",
         color = "#FF0000",
         weight = 2,
-        fillOpacity = 0.2
+        fillOpacity = 0.2,
+        popup = ~ popup_text
       )
   })
   
