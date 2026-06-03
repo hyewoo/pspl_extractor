@@ -100,9 +100,10 @@ body {
 }
 
 .navbar-nav>li>a {
-/*    line-height: 30px; */
+/*    line-height: 30px; 
     font-size: 13px;
-}
+}*/
+
 
 .navbar-default .navbar-nav>li>a:focus, .navbar-default .navbar-nav>li>a:hover {
     color: #f0f0f0;

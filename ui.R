@@ -265,7 +265,7 @@ ui <- dashboardPage(
         style = "margin-top: -30px; margin-bottom: 0px;",
         checkboxInput(
           "show_coords",
-          label = "Display on map",
+          label = "Show on map",
           value = FALSE
         )
       ),
@@ -353,6 +353,11 @@ ui <- dashboardPage(
       background: transparent !important;
       border: none !important;
       box-shadow: none !important;
+}
+    .box {
+      border-top: none;
+      border-radius: 6px;
+      box-shadow: 0 1px 1px rgb(0 0 0 / 10%);
     }
     "))),
     
