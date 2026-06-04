@@ -193,7 +193,12 @@ server <- function(input, output, session) {
     # guard clause
     if (is.null(shp) || nrow(shp) == 0) return()
     
-    shp <- cbind(shp, poly_pspl())%>%
+    # repair geometries
+    shp <- sf::st_make_valid(shp)
+    
+    pspl <- poly_pspl()
+    
+    shp <- cbind(shp, pspl)%>%
       dplyr::rename(SI = dplyr::matches("si_pspl_9")) %>%
       dplyr::mutate(SI = round(SI, 1))
     
@@ -202,15 +207,59 @@ server <- function(input, output, session) {
       "<b>ID:</b> ", shp$ID, ", <b>SI: </b> ", shp$SI
     )
     
-    proxy %>%
-      addPolygons(
-        data = shp,
-        group = "imp",
-        color = "#FF0000",
-        weight = 2,
-        fillOpacity = 0.2,
-        popup = ~ popup_text
+    #proxy %>%
+    #  addPolygons(
+    #    data = shp,
+    #    group = "imp",
+    #    color = "#FF0000",
+    #    weight = 2,
+    #    fillOpacity = 0.2,
+    #    popup = ~popup_text
+    #  )
+    
+    geom_types <- unique(as.character(sf::st_geometry_type(shp)))
+    
+    if (all(geom_types %in% c("POLYGON", "MULTIPOLYGON"))) {
+      
+      proxy %>%
+        addPolygons(
+          data = shp,
+          group = "imp",
+          color = "#FF0000",
+          weight = 2,
+          fillOpacity = 0.2,
+          popup = ~popup_text
+        )
+      
+    } else if (all(geom_types %in% c("POINT", "MULTIPOINT"))) {
+      
+      proxy %>%
+        addCircleMarkers(
+          data = shp,
+          group = "imp",
+          radius = 6,
+          color = "#FF0000",
+          fillColor = "#FF0000",
+          fillOpacity = 0.8,
+          stroke = TRUE,
+          weight = 1,
+          popup = ~popup_text
+        )
+      
+    } else {
+      
+      showModal(
+        modalDialog(
+          title = "Unsupported Geometry Type",
+          paste(
+            "Uploaded data contains unsupported geometry types:",
+            paste(geom_types, collapse = ", ")
+          ),
+          easyClose = TRUE
+        )
       )
+      
+    }
   })
   
   #source(file.path("C:/Users/HYEWOO/OneDrive/Documents/FAIB/Documents/Worklog/250220_reactive.R"), local = TRUE) 
@@ -350,8 +399,8 @@ server <- function(input, output, session) {
     switch(ext,
            csv = fread(input$upload$datapath),
            txt = read.delim(input$upload$datapath),
-           geojson = read_sf(input$upload$datapath),
-           validate("Invalid file type; please upload a .csv, .txt, or .geojson file.")
+           #geojson = read_sf(input$upload$datapath),
+           validate("Invalid file type; please upload a .csv or .txt file.")
     )
   })
   
@@ -451,16 +500,16 @@ server <- function(input, output, session) {
   
   
   output$upload_ui <- renderUI({
-    fileInput("upload", "Upload a file (.csv, .txt, .geojson)",
-              accept = c(".csv", ".txt", ".geojson"))
+    fileInput("upload", "Upload a file (.csv, .txt)",
+              accept = c(".csv", ".txt"))
   })
   
   
   observeEvent(input$clear_batch, {
     
     output$upload_ui <- renderUI({
-      fileInput("upload", "Upload a file (.csv, .txt, .geojson)",
-                accept = c(".csv", ".txt", ".geojson"))
+      fileInput("upload", "Upload a file (.csv, .txt)",
+                accept = c(".csv", ".txt"))
     })
     
     # reset selects
@@ -484,7 +533,7 @@ server <- function(input, output, session) {
   })
   
   output$file_ui <- renderUI({
-    fileInput("filemap", "Upload Shapefile", multiple = TRUE)
+    fileInput("filemap", "Upload point or polygon (.shp, .kmz, .geojson)", multiple = TRUE)
   })
   
   
@@ -492,6 +541,74 @@ server <- function(input, output, session) {
   warningModal = modalDialog(
     title = "Important message",
     "Shapefile not valid")
+  
+  ##Import Shapefile as df
+  #impShp <- reactive({
+  #  
+  #  if (is.null(values$upload_state)) {
+  #    
+  #    return(NULL)
+  #    
+  #  } else if (values$upload_state == 'uploaded') {
+  #    
+  #    if (!is.null(input$filemap)){
+  #      shpValid <- TRUE
+  #      shpdf <- input$filemap
+  #      tempdirname <- dirname(shpdf$datapath[1])
+  #      fileList <- list()
+  #      i <- 1
+  #      for (file in shpdf$datapath) {
+  #        fileExt <- strsplit(file, "\\.")
+  #        fileExt <-fileExt[[1]][length(fileExt[[1]])]
+  #        fileList[[i]] <- fileExt
+  #        i <- i + 1
+  #        if (fileExt %in% c("shp","dbf", "shx", "sbn", "sbx", "prj", "xml","cpg"))
+  #        {
+  #          print ("shp ext is good")
+  #        }
+  #        else{
+  #          shpValid <- FALSE
+  #          showModal(warningModal)}
+  #      }
+  #      
+  #      if(!"shp" %in% fileList | !"shp" %in% fileList | !"dbf" %in% fileList | !"shx" %in% fileList )
+  #      { shpValid <- FALSE
+  #      showModal(warningModal)}
+  #      
+  #      if (shpValid){
+  #        # Rename files
+  #        for(i in 1:nrow(shpdf)){
+  #          file.rename(shpdf$datapath[i], paste0(tempdirname, "/", shpdf$name[i]))
+  #        }
+  #        tryCatch(
+  #          {outShp <-  st_transform(st_read(paste(tempdirname, shpdf$name[grep(pattern = "*.shp$", shpdf$name)], sep = "/")), 4326)}
+  #          ,
+  #          error=function(cond) {
+  #            shpValid <- FALSE
+  #            showModal(warningModal)
+  #            outShp <- NULL
+  #            message("Here's the original error message:")
+  #            
+  #          }
+  #          ,
+  #          finally ={print ("shape done")}
+  #        )
+  #      }
+  #      
+  #    }
+  #    if (!shpValid) {
+  #      outShp = NULL
+  #      
+  #    }
+  #    else{outShp}
+  #    outShp
+  #    
+  #  } else if (values$upload_state == 'reset') {
+  #    return(NULL)
+  #  }
+  #  
+  #})
+  
   
   #Import Shapefile as df
   impShp <- reactive({
@@ -502,50 +619,209 @@ server <- function(input, output, session) {
       
     } else if (values$upload_state == 'uploaded') {
       
-      if (!is.null(input$filemap)){
+      if (!is.null(input$filemap)) {
+        
         shpValid <- TRUE
         shpdf <- input$filemap
+        
         tempdirname <- dirname(shpdf$datapath[1])
-        fileList <- list()
-        i <- 1
-        for (file in shpdf$datapath) {
-          fileExt <- strsplit(file, "\\.")
-          fileExt <-fileExt[[1]][length(fileExt[[1]])]
-          fileList[[i]] <- fileExt
-          i <- i + 1
-          if (fileExt %in% c("shp","dbf", "shx", "sbn", "sbx", "prj", "xml","cpg"))
-          {
-            print ("shp ext is good")
-          }
-          else{
-            shpValid <- FALSE
-            showModal(warningModal)}
-        }
         
-        if(!"shp" %in% fileList | !"shp" %in% fileList | !"dbf" %in% fileList | !"shx" %in% fileList )
-        { shpValid <- FALSE
-        showModal(warningModal)}
+        fileList <- tolower(tools::file_ext(shpdf$name))
         
-        if (shpValid){
-          # Rename files
-          for(i in 1:nrow(shpdf)){
-            file.rename(shpdf$datapath[i], paste0(tempdirname, "/", shpdf$name[i]))
-          }
-          tryCatch(
-            {outShp <-  st_transform(st_read(paste(tempdirname, shpdf$name[grep(pattern = "*.shp$", shpdf$name)], sep = "/")), 4326)}
-            ,
-            error=function(cond) {
-              shpValid <- FALSE
-              showModal(warningModal)
-              outShp <- NULL
-              message("Here's the original error message:")
-              
+        # ---- KMZ upload ----
+        if (length(fileList) == 1 && fileList == "kmz") {
+          
+          kmz_file <- shpdf$datapath[1]
+          
+          tryCatch({
+            
+            #outShp <- sf::st_read(kmz_file, quiet = TRUE) |>
+            #  sf::st_transform(4326)
+            
+            target_dir <- tempdir() # Temporary folder to hold unzipped files
+            unzip(kmz_file, exdir = target_dir)
+            
+            # 3. Find the path of the newly extracted .kml file
+            kml_file <- list.files(target_dir, pattern = "\\.kml$", full.names = TRUE)
+            
+            ## 4. (Optional) Check the spatial layers within the KML file
+            #st_layers(kml_file)
+            
+            # 5. Read the spatial data into R
+            outShp <- st_read(kml_file) |>
+              sf::st_transform(4326)
+            
+          },
+          error = function(e) {
+            
+            shpValid <<- FALSE
+            outShp <<- NULL
+            
+            showModal(warningModal)
+            
+            message("Error reading KMZ:")
+            message(e$message)
+            
+          })
+          
+          ## Check geometry types
+          #geom_types <- unique(as.character(sf::st_geometry_type(outShp)))
+          #
+          ## Allow only POLYGON and MULTIPOLYGON
+          #valid_geom <- c("POLYGON", "MULTIPOLYGON")
+          #
+          #if (!all(geom_types %in% valid_geom)) {
+          #  
+          #  shpValid <- FALSE
+          #  outShp <- NULL
+          #  
+          #  showModal(
+          #    modalDialog(
+          #      title = "Invalid KMZ File",
+          #      paste(
+          #        "The uploaded KMZ contains non-polygon geometry types:",
+          #        paste(geom_types, collapse = ", "),
+          #        "\n\nPlease upload a KMZ containing polygon features only."
+          #      ),
+          #      easyClose = TRUE
+          #    )
+          #  )
+          #  
+          #  return()
+          #}
+          
+        } else if (length(fileList) == 1 && fileList == "kml") {
+          
+          tryCatch({
+            
+            # Restore original filename
+            kml_file <- file.path(tempdirname, shpdf$name[1])
+            
+            file.rename(
+              shpdf$datapath[1],
+              kml_file
+            )
+            
+            outShp <- sf::st_read(
+              kml_file,
+              quiet = TRUE
+            ) |>
+              sf::st_transform(4326)
+            
+            # Remove Z/M dimensions if present
+            outShp <- sf::st_zm(outShp, drop = TRUE, what = "ZM")
+            
+            # Remove empty geometries
+            outShp <- outShp[!sf::st_is_empty(outShp), ]
+            
+            if (nrow(outShp) == 0) {
+              stop("The KML file contains no valid spatial features.")
             }
-            ,
-            finally ={print ("shape done")}
-          )
+          },
+          error = function(e) {
+            
+            shpValid <<- FALSE
+            outShp <<- NULL
+            
+            showModal(warningModal)
+            
+            message("Error reading KML:")
+            message(e$message)
+            
+          })
+          
+        } else if (length(fileList) == 1 && fileList == "geojson") {
+          
+          tryCatch({
+            
+            # Restore original filename
+            kml_file <- file.path(tempdirname, shpdf$name[1])
+            
+            file.rename(
+              shpdf$datapath[1],
+              kml_file
+            )
+            
+            outShp <- sf::st_read(
+              kml_file,
+              quiet = TRUE
+            ) |>
+              sf::st_transform(4326)
+            
+            ## Remove Z/M dimensions if present
+            #outShp <- sf::st_zm(outShp, drop = TRUE, what = "ZM")
+            
+            # Remove empty geometries
+            outShp <- outShp[!sf::st_is_empty(outShp), ]
+            
+            if (nrow(outShp) == 0) {
+              stop("The KML file contains no valid spatial features.")
+            }
+          },
+          error = function(e) {
+            
+            shpValid <<- FALSE
+            outShp <<- NULL
+            
+            showModal(warningModal)
+            
+            message("Error reading GEOJSON:")
+            message(e$message)
+            
+          })
+          
+        } else {
+          
+          # ---- Shapefile upload ----
+          validExt <- c("shp", "dbf", "shx", "sbn", "sbx", "prj", "xml", "cpg")
+          
+          if (any(!fileList %in% validExt)) {
+            shpValid <- FALSE
+            showModal(warningModal)
+          }
+          
+          requiredExt <- c("shp", "dbf", "shx")
+          
+          if (!all(requiredExt %in% fileList)) {
+            shpValid <- FALSE
+            showModal(warningModal)
+          }
+          
+          if (shpValid) {
+            
+            for (i in seq_len(nrow(shpdf))) {
+              file.rename(
+                shpdf$datapath[i],
+                file.path(tempdirname, shpdf$name[i])
+              )
+            }
+            
+            tryCatch({
+              
+              shp_file <- shpdf$name[
+                grepl("\\.shp$", shpdf$name, ignore.case = TRUE)
+              ]
+              
+              outShp <- sf::st_read(
+                file.path(tempdirname, shp_file),
+                quiet = TRUE
+              ) |>
+                sf::st_transform(4326)
+              
+            },
+            error = function(e) {
+              
+              shpValid <<- FALSE
+              outShp <<- NULL
+              
+              showModal(warningModal)
+              
+              message("Error reading shapefile:")
+              message(e$message)
+              
+            })
+          }
         }
-        
       }
       if (!shpValid) {
         outShp = NULL
@@ -559,6 +835,7 @@ server <- function(input, output, session) {
     }
     
   })
+  
   
   
   poly_pspl <- reactive({
@@ -613,7 +890,7 @@ server <- function(input, output, session) {
   observeEvent(input$clear_poly, {
     
     output$file_ui <- renderUI({
-      fileInput("filemap", "Upload Shapefile", multiple = TRUE)
+      fileInput("filemap", "Upload point or polygon (.shp, .kmz, .geojson)", multiple = TRUE)
     })
     
     leafletProxy("map") %>%
