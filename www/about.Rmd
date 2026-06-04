@@ -45,8 +45,8 @@ For more info, visit [Provincial Site Productivity Layer webpage](https://www2.g
 This web-based application was developed to facilitate custom queries and downloads of PSPL v.9.0 estimates for user-defined locations or areas of interest.  For complex analyses or large datasets, it is recommended to download the PSPL layers and perform processing in a local GIS or statistical environment.  
 
 -  Users can specify a **single point** location to extract PSPL estimates, or upload a **list of points** for batch extraction.  
--  Users can upload a **spatial polygon** (*.shp*) to compute the mean PSPL value within a defined area.  
--  The maximum file size for uploading a list of points or a shapefileis is **30 MB**.  
+-  Users can upload a **spatial file** (*.shp, .kml, .kmz, .geojson*). For polygon files, the mean PSPL value within a defined area will be computed.  
+-  The maximum file size for uploading a list of points or a spatial file is **30 MB**.  
 -  Large input files or polygons covering extensive areas may require longer processing times.  
 -  Layers displayed on the map are resampled to a coarser resolution to 
             improve performance and reduce loading time. All PSPL value extractions 
@@ -84,7 +84,7 @@ The result will be displayed below the map.
  
 Unfold **Upload Batch Coordinates** box by clicking the toggle on the right.  ![](batch.png)  
 
-Upload a file containing list of coordinates (*.csv, .txt, or .geojson*). The file should contain columns of x-coordinate, y-coordinate, and an ID column unique for each row.  For example:  
+Upload a file containing list of coordinates (*.csv or .txt*). The file should contain columns of x-coordinate, y-coordinate, and an ID column unique for each row.  For example:  
 
 
 ![](samplelist1.png){width=35%} ![](samplelist2.png){width=55%}
@@ -102,16 +102,20 @@ The list of extracted PSPL values can be downloaded via Download button.  ![](do
  
  <br>
  
-### 3. Extract mean PSPL value within a polygon map
+### 3. Extract PSPL values from a spatial file
  
  
-Unfold **Upload Polygon** box by clicking the toggle on the right.  ![](poly.png)  
+Expand the **Upload Spatial File** box by clicking the toggle on the right.  ![](poly.png)  
 
-Upload all required components of a valid shapefile, including at minimum the *.shp, .shx, .dbf*, and *.prj* files. For example:  
+Upload a spatial file in one of the following formats: **.shp, .kml, .kmz, or .geojson**.  
+
+-  Only **POINT**, **POLYGON**, and **MULTIPOLYGON** geometries are supported.  
+-  **.kml** or **.kmz** should contain a single layer.  
+-  For shapefiles (**.shp**), all required components of a valid shapefile must be uploaded together. At a minimum, this includes the *.shp, .shx, .dbf, and .prj* files.  An example of a valid shapefile upload is shown below:  
 
 ![](polyupload.png){width=80%}
 
-Once uploaded, the application will extract PSPL values within the polygon and compute the **mean of all raster cells whose centroids fall inside the polygon boundaries**.  
+Once uploaded, the application will extract PSPL values at point locations or within polygon boundaries. For polygon inputs, it computes the **mean of all raster cells whose centroids fall within the polygon**.  
 
 If the shapefile contains multiple polygons, PSPL values will be summarized separately for each polygon.  
  

@@ -255,12 +255,6 @@ ui <- dashboardPage(
         )
       ),
       
-      #checkboxInput(
-      #  "show_coords",
-      #  label = "Display on map",
-      #  value = FALSE
-      #),
-      
       tags$div(
         style = "margin-top: -30px; margin-bottom: 0px;",
         checkboxInput(
@@ -286,7 +280,7 @@ ui <- dashboardPage(
           tags$h3(
             class = "box-title",
             style = "font-size:14px; font-weight:bold;",
-            "Upload Polygon"
+            "Upload Spatial File"
           ),
           
           # collapse button
