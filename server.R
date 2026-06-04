@@ -180,7 +180,7 @@ server <- function(input, output, session) {
   })
   
   
-  observeEvent(impShp(), {
+  observeEvent(poly_pspl(), {
     
     proxy <- leafletProxy("map")
     
@@ -843,10 +843,42 @@ server <- function(input, output, session) {
     req(input$filemap, impShp())
     
     poly1 <- impShp()
+    poly1 <- sf::st_make_valid(poly1)
     
     pspl <- rv$r
     
     poly1_conv <- st_transform(poly1, crs = 3005)
+    
+    poly_area_m2 <- sum(sf::st_area(poly1_conv))
+    cell_area_m2 <- prod(terra::res(pspl))
+    n_cells_est <- as.numeric(poly_area_m2 / cell_area_m2)
+    
+    # ---- HARD STOP IF TOO LARGE ----
+    if (n_cells_est > 5e6) {
+      
+      showModal(modalDialog(
+        title = "Polygon too large",
+        paste0(
+          #"This polygon is estimated to cover ",
+          #format(round(n_cells_est, 0), big.mark = ","),
+          #" raster cells.\n\n",
+          "Cannot process very large polygons as this may cause the application to freeze.\n",
+          "Please upload a smaller polygon."
+        ),
+        easyClose = FALSE,
+        footer = modalButton("OK")
+      ))
+      
+      return(NULL)
+    }
+    
+    #if (n_cells_est > 5e6) {
+    #  showNotification(
+    #    "Large polygon detected. Extraction may take several minutes.",
+    #    type = "warning",
+    #    duration = NULL
+    #  )
+    #}
     
     withProgress(message = "Extracting values...", value = 0, {
       
