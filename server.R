@@ -19,6 +19,7 @@ server <- function(input, output, session) {
     req(input$species)
     species <- input$species
     
+    
     # -------------------------
     # 1. GET / CACHE RAW RASTER
     # -------------------------
@@ -50,15 +51,15 @@ server <- function(input, output, session) {
       
       withProgress(message = "Aggregating raster...", value = 0, {
         
-        incProgress(0.5, detail = "Aggregating...")
+        incProgress(0.6, detail = "Aggregating...")
         
         rv$agg_cache[[species]] <- leaflet::projectRasterForLeaflet(terra::aggregate(rv$r, fact = 10), method = "near")
         
         incProgress(0.8, detail = "Done")
       })
     }
-    
     rv$r2 <- rv$agg_cache[[species]]
+    
   })
   
   
@@ -434,6 +435,29 @@ server <- function(input, output, session) {
     crs_df <- get_crs(input$crs_batch)
     
     df <- df %>% dplyr::select(input$idcol, x = input$xcol, y = input$ycol) 
+    
+    # Check for missing coordinates
+    missing_coord <- is.na(df$x) | is.na(df$y)
+    
+    if (any(missing_coord)) {
+      
+      n_missing <- sum(missing_coord)
+      
+      showModal(
+        modalDialog(
+          title = "Missing Coordinates",
+          paste0(
+            n_missing,
+            " record(s) have missing X or Y coordinates and cannot be processed."
+          ),
+          tags$p("Please correct or remove these records and try again."),
+          easyClose = FALSE,
+          footer = modalButton("OK")
+        )
+      )
+      
+      return(NULL)
+    }
     
     df$ID <- 1:nrow(df)
     
